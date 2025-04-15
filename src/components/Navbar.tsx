@@ -9,27 +9,11 @@ import { useCart } from "@/hooks/useCart";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { cartItems } = useCart();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -40,6 +24,9 @@ export default function Navbar() {
         top: 0,
         behavior: 'smooth'
       });
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
     }
   };
 
@@ -58,9 +45,7 @@ export default function Navbar() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full mt-4 px-4",
-        isScrolled
-          ? "glass-header py-2 shadow-lg rounded-full mx-auto max-w-[95%]"
-          : "bg-transparent py-4 rounded-full mx-auto max-w-[95%]",
+        "glass-header py-2 shadow-lg rounded-full mx-auto max-w-[95%]",
         isMobile && "glass-header-mobile"
       )}
     >
@@ -83,19 +68,19 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <form onSubmit={handleSearch} className="relative">
+          <form onSubmit={handleSearch} className="relative hidden md:block">
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10 pl-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm hidden md:block focus:outline-none focus:ring-2 focus:ring-brand-blue"
+              className="pr-10 pl-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
             />
             <Button 
               variant="ghost" 
               size="icon"
               type="submit"
-              className="absolute right-0 top-0 md:top-1/2 md:transform md:-translate-y-1/2"
+              className="absolute right-0 top-1/2 transform -translate-y-1/2"
             >
               <Search size={20} />
             </Button>
@@ -116,12 +101,29 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu - Using a single X icon for closing */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-50 glass-header-mobile lg:hidden transition-all duration-300 rounded-3xl mt-16 mx-2"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md lg:hidden transition-all duration-300 rounded-3xl mt-16 mx-2"
         >
           <div className="flex flex-col h-full pt-6 p-6">
+            <form onSubmit={handleSearch} className="relative mb-6">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pr-10 pl-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+              />
+              <Button 
+                variant="ghost" 
+                size="icon"
+                type="submit"
+                className="absolute right-0 top-1/2 transform -translate-y-1/2"
+              >
+                <Search size={20} />
+              </Button>
+            </form>
             <nav className="flex flex-col space-y-6 text-lg font-semibold">
               <Link to="/" onClick={handleNavigation}>Home</Link>
               <Link to="/products" onClick={handleNavigation}>Products</Link>
