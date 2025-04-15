@@ -44,7 +44,7 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full mt-4 px-4",
+        "fixed top-0 left-0 right-0 z-50 w-full mt-4 px-4",
         "glass-header py-2 shadow-lg rounded-full mx-auto max-w-[95%]",
         isMobile && "glass-header-mobile"
       )}
@@ -101,10 +101,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Making it more opaque with a milky glassy appearance */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md lg:hidden transition-all duration-300 rounded-3xl mt-16 mx-2"
+          className="fixed inset-0 z-50 bg-white/50 backdrop-blur-md lg:hidden transition-all duration-300 rounded-3xl mt-16 mx-2 border border-white/30 shadow-lg"
         >
           <div className="flex flex-col h-full pt-6 p-6">
             <form onSubmit={handleSearch} className="relative mb-6">
@@ -113,7 +113,7 @@ export default function Navbar() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pr-10 pl-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                className="w-full pr-10 pl-4 py-2 bg-white/30 backdrop-blur-md border border-white/30 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
               <Button 
                 variant="ghost" 
