@@ -1,58 +1,18 @@
 
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Minus, Plus, ShoppingBag, Trash2, TruckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock cart data
-const initialCartItems = [
-  {
-    id: "1",
-    name: "Premium Cotton Henley Shirt",
-    price: 49.99,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=800&auto=format&fit=crop",
-    size: "M",
-    color: "White"
-  },
-  {
-    id: "2",
-    name: "Slim Fit Jeans",
-    price: 59.99,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?q=80&w=800&auto=format&fit=crop",
-    size: "32",
-    color: "Blue"
-  }
-];
+import { useCart } from "@/hooks/useCart";
+import { useState } from "react";
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const { toast } = useToast();
-  
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(
-      cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-  
-  const removeItem = (id: string) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-    
-    toast({
-      title: "Item removed",
-      description: "The item has been removed from your cart.",
-    });
-  };
   
   const applyPromoCode = () => {
     if (promoCode.toLowerCase() === "glassy20") {
@@ -113,7 +73,7 @@ export default function CartPage() {
               
               <div className="space-y-6">
                 {cartItems.map((item) => (
-                  <div key={item.id}>
+                  <div key={item.id + (item.size || '') + (item.color || '')}>
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                       {/* Product info */}
                       <div className="col-span-6 flex gap-4">
@@ -122,13 +82,15 @@ export default function CartPage() {
                         </div>
                         <div>
                           <h3 className="font-medium">{item.name}</h3>
-                          <div className="text-sm text-gray-500 mt-1">
-                            <span>Size: {item.size}</span>
-                            <span className="ml-3">Color: {item.color}</span>
-                          </div>
+                          {item.size && item.color && (
+                            <div className="text-sm text-gray-500 mt-1">
+                              <span>Size: {item.size}</span>
+                              <span className="ml-3">Color: {item.color}</span>
+                            </div>
+                          )}
                           <button 
                             className="text-red-500 text-sm flex items-center mt-2 md:hidden"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeFromCart(item.id)}
                           >
                             <Trash2 size={14} className="mr-1" /> Remove
                           </button>
@@ -169,7 +131,7 @@ export default function CartPage() {
                         </div>
                         <button 
                           className="text-red-500 text-sm hidden md:flex items-center justify-end mt-2 w-full"
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 size={14} className="mr-1" /> Remove
                         </button>
@@ -187,7 +149,7 @@ export default function CartPage() {
                 <Button
                   variant="outline"
                   className="text-red-500 border-red-500 hover:bg-red-50"
-                  onClick={() => setCartItems([])}
+                  onClick={() => clearCart()}
                 >
                   Clear Cart
                 </Button>

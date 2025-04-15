@@ -1,14 +1,18 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, Search, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import NavMenu from "./NavMenu";
+import { useCart } from "@/hooks/useCart";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { cartItems } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +28,14 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <header
@@ -52,18 +64,34 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon">
-            <Search size={20} />
-          </Button>
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-10 pl-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm hidden md:block focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              type="submit"
+              className="absolute right-0 top-0 md:top-1/2 md:transform md:-translate-y-1/2"
+            >
+              <Search size={20} />
+            </Button>
+          </form>
           <Button variant="ghost" size="icon">
             <User size={20} />
           </Button>
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag size={20} />
-              <span className="absolute -top-1 -right-1 bg-brand-blue text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                0
-              </span>
+              {cartItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-brand-blue text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                  {cartItems.length}
+                </span>
+              )}
             </Button>
           </Link>
         </div>

@@ -1,8 +1,57 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+
+// Set the end date for the sale (2 weeks from now by default)
+const DEFAULT_END_DATE = new Date();
+DEFAULT_END_DATE.setDate(DEFAULT_END_DATE.getDate() + 14);
 
 export default function PromoSection() {
+  // Make the end date configurable through a prop or environment variable
+  const endDate = process.env.PROMO_END_DATE 
+    ? new Date(process.env.PROMO_END_DATE) 
+    : DEFAULT_END_DATE;
+    
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const difference = +endDate - +new Date();
+      
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      } else {
+        // Sale has ended
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    // Calculate immediately
+    calculateTimeLeft();
+    
+    // Update the timer every second
+    const timer = setInterval(calculateTimeLeft, 1000);
+    
+    // Clear interval on component unmount
+    return () => clearInterval(timer);
+  }, [endDate]);
+
+  // Format the numbers to always show two digits
+  const formatNumber = (num: number) => {
+    return num.toString().padStart(2, '0');
+  };
+
   return (
     <section className="py-24 relative">
       <div className="absolute inset-0 z-0">
@@ -22,19 +71,19 @@ export default function PromoSection() {
           <div className="glass inline-block p-8 rounded-lg mb-12">
             <div className="grid grid-cols-4 gap-6 mb-8">
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">00</div>
+                <div className="text-4xl font-bold mb-2">{formatNumber(timeLeft.days)}</div>
                 <div className="text-sm text-gray-300">Days</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">00</div>
+                <div className="text-4xl font-bold mb-2">{formatNumber(timeLeft.hours)}</div>
                 <div className="text-sm text-gray-300">Hours</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">00</div>
+                <div className="text-4xl font-bold mb-2">{formatNumber(timeLeft.minutes)}</div>
                 <div className="text-sm text-gray-300">Minutes</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">00</div>
+                <div className="text-4xl font-bold mb-2">{formatNumber(timeLeft.seconds)}</div>
                 <div className="text-sm text-gray-300">Seconds</div>
               </div>
             </div>

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/useCart";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductCardProps {
   product: {
@@ -21,8 +23,28 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
   
   const displayImage = isHovered && product.hoverImage ? product.hoverImage : product.image;
+  
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.discountPrice || product.price,
+      quantity: 1,
+      image: product.image
+    });
+    
+    toast({
+      title: "Added to cart!",
+      description: `${product.name} added to your cart.`,
+    });
+  };
   
   return (
     <div 
@@ -67,6 +89,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               variant="ghost"
               size="icon"
               className="bg-transparent hover:bg-white/20 text-white h-10 w-10 rounded-none"
+              onClick={handleQuickAdd}
             >
               <ShoppingBag size={18} />
             </Button>

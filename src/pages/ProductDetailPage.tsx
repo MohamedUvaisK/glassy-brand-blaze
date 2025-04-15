@@ -1,99 +1,158 @@
 
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { ChevronDown, Heart, Minus, Plus, Share, ShoppingBag, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/ProductCard";
+import { useCart } from "@/hooks/useCart";
 
-// Mock product data - in a real app this would come from an API
-const product = {
-  id: "1",
-  name: "Premium Cotton Henley Shirt",
-  price: 49.99,
-  discountPrice: null,
-  description: "Our Premium Cotton Henley Shirt is crafted from 100% organic cotton, offering exceptional comfort and breathability. The classic henley design with a three-button placket adds a touch of casual sophistication to your everyday wardrobe.",
-  details: [
-    "100% organic cotton",
-    "Regular fit",
-    "Three-button placket",
-    "Ribbed cuffs",
-    "Machine washable"
-  ],
-  features: [
-    "Breathable fabric ideal for all-day wear",
-    "Eco-friendly manufacturing process",
-    "Durable construction for long-lasting quality",
-    "Available in multiple colors",
-    "Versatile style for casual or smart-casual occasions"
-  ],
-  images: [
-    "https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1565115021788-6d3f1ede4980?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1589831494949-63d77bce6d5d?q=80&w=800&auto=format&fit=crop"
-  ],
-  sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-  colors: ["White", "Black", "Navy", "Gray"],
-  category: "men",
-  subcategory: "shirts",
-  isNew: true,
-  isSale: false
-};
-
-// Similar products
-const similarProducts = [
+// Sample product data - in a real app this would come from an API
+const allProducts = [
+  {
+    id: "1",
+    name: "Premium Cotton Henley Shirt",
+    price: 49.99,
+    discountPrice: null,
+    description: "Our Premium Cotton Henley Shirt is crafted from 100% organic cotton, offering exceptional comfort and breathability. The classic henley design with a three-button placket adds a touch of casual sophistication to your everyday wardrobe.",
+    details: [
+      "100% organic cotton",
+      "Regular fit",
+      "Three-button placket",
+      "Ribbed cuffs",
+      "Machine washable"
+    ],
+    features: [
+      "Breathable fabric ideal for all-day wear",
+      "Eco-friendly manufacturing process",
+      "Durable construction for long-lasting quality",
+      "Available in multiple colors",
+      "Versatile style for casual or smart-casual occasions"
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565115021788-6d3f1ede4980?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1589831494949-63d77bce6d5d?q=80&w=800&auto=format&fit=crop"
+    ],
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    colors: ["White", "Black", "Navy", "Gray"],
+    category: "men",
+    subcategory: "shirts",
+    isNew: true,
+    isSale: false
+  },
   {
     id: "2",
     name: "Slim Fit Jeans",
     price: 59.99,
-    image: "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?q=80&w=800&auto=format&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=800&auto=format&fit=crop",
+    discountPrice: null,
+    description: "These slim fit jeans are designed for modern style and comfort. Made from high-quality denim with just the right amount of stretch, they offer a perfect fit that maintains its shape throughout the day.",
+    details: [
+      "98% cotton, 2% elastane",
+      "Slim fit",
+      "Five-pocket styling",
+      "Button and zip closure",
+      "Machine washable"
+    ],
+    features: [
+      "High-quality denim with comfortable stretch",
+      "Timeless design for versatile styling",
+      "Reinforced stitching for durability",
+      "Eco-friendly washing process",
+      "Comfortable waistband design"
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1541840031508-7856a9a402f1?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?q=80&w=800&auto=format&fit=crop"
+    ],
+    sizes: ["30", "32", "34", "36", "38"],
+    colors: ["Blue", "Black", "Gray", "Light Blue"],
     category: "men",
     subcategory: "pants"
   },
   {
-    id: "5",
-    name: "Leather Jacket",
-    price: 199.99,
-    image: "https://images.unsplash.com/photo-1521223890158-f9f7c3d5d504?q=80&w=800&auto=format&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1616258734174-0b11a5a9d4c7?q=80&w=800&auto=format&fit=crop",
-    category: "men",
-    subcategory: "jackets",
-    isSale: true,
-    discountPrice: 149.99
-  },
-  {
-    id: "11",
-    name: "Linen Button Down",
-    price: 49.99,
-    image: "https://images.unsplash.com/photo-1598522325320-68d6279cffd0?q=80&w=800&auto=format&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1594938291221-94f18cbb5660?q=80&w=800&auto=format&fit=crop",
-    category: "men",
-    subcategory: "shirts"
-  },
-  {
-    id: "8",
-    name: "Wool Overcoat",
-    price: 249.99,
-    image: "https://images.unsplash.com/photo-1548883354-94bcfe321cbb?q=80&w=800&auto=format&fit=crop",
-    hoverImage: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=800&auto=format&fit=crop",
-    category: "men",
-    subcategory: "jackets"
+    id: "3",
+    name: "Floral Summer Dress",
+    price: 79.99,
+    discountPrice: null,
+    description: "This floral summer dress is perfect for warm days and special occasions. The lightweight fabric drapes beautifully while the vibrant floral pattern adds a touch of elegance to your summer wardrobe.",
+    details: [
+      "100% rayon",
+      "Flowy A-line silhouette",
+      "Adjustable straps",
+      "Lined bodice",
+      "Machine washable"
+    ],
+    features: [
+      "Breathable lightweight fabric for hot days",
+      "Versatile design for casual or dressy occasions",
+      "Vibrant pattern that resists fading",
+      "Comfortable fit with gentle elastic at back",
+      "Side pockets for practicality"
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1612336307429-8a898d10e223?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1618244972963-dbad6cf64b21?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1623091410901-00e2d268901f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?q=80&w=800&auto=format&fit=crop"
+    ],
+    sizes: ["XS", "S", "M", "L", "XL"],
+    colors: ["Floral Print", "Blue Floral", "Red Floral"],
+    category: "women",
+    subcategory: "dresses",
+    isNew: true
   }
 ];
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  
+  // Find the product by ID
+  const product = allProducts.find(p => p.id === id);
   
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  
+  // If product not found, navigate to 404
+  useEffect(() => {
+    if (!product && id) {
+      navigate('/not-found');
+    }
+  }, [product, id, navigate]);
+  
+  // Reset state when product changes
+  useEffect(() => {
+    setSelectedImage(0);
+    setSelectedSize("");
+    setSelectedColor("");
+    setQuantity(1);
+    setIsWishlisted(false);
+  }, [id]);
+  
+  if (!product) {
+    return (
+      <div className="pt-24 container mx-auto px-4 py-12">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Product not found</h2>
+          <p className="mt-2">The product you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/products')} className="mt-4">
+            Back to Products
+          </Button>
+        </div>
+      </div>
+    );
+  }
   
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -112,11 +171,26 @@ export default function ProductDetailPage() {
       return;
     }
     
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.discountPrice || product.price,
+      quantity: quantity,
+      image: product.images[0],
+      size: selectedSize,
+      color: selectedColor
+    });
+    
     toast({
       title: "Added to cart!",
       description: `${product.name} (${selectedColor}, ${selectedSize}) x ${quantity}`,
     });
   };
+  
+  // Similar products filtering (exclude current product and limit to 4)
+  const similarProducts = allProducts
+    .filter(p => p.id !== product.id && p.category === product.category)
+    .slice(0, 4);
   
   return (
     <div className="pt-24">
@@ -353,14 +427,16 @@ export default function ProductDetailPage() {
         </div>
         
         {/* Similar products */}
-        <div className="mt-20">
-          <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {similarProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        {similarProducts.length > 0 && (
+          <div className="mt-20">
+            <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {similarProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -127,17 +127,42 @@ const allProducts = [
 ];
 
 export default function ProductsPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 250]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [filteredProducts, setFilteredProducts] = useState(allProducts);
   
   const category = searchParams.get("category");
   const subcategory = searchParams.get("subcategory");
   const tag = searchParams.get("tag");
+  const search = searchParams.get("search");
   
+  // Initialize filters from URL parameters
+  useEffect(() => {
+    if (category) {
+      setSelectedCategories([category]);
+    }
+    
+    if (tag === "new" || tag === "sale") {
+      setSelectedStatus([tag]);
+    }
+  }, [category, tag]);
+  
+  // Apply filters
   useEffect(() => {
     let products = [...allProducts];
+    
+    // Filter by search query
+    if (search) {
+      const searchLower = search.toLowerCase();
+      products = products.filter(p => 
+        p.name.toLowerCase().includes(searchLower) ||
+        p.category.toLowerCase().includes(searchLower) ||
+        (p.subcategory && p.subcategory.toLowerCase().includes(searchLower))
+      );
+    }
     
     // Apply filters from URL params
     if (category) {
@@ -154,6 +179,19 @@ export default function ProductsPage() {
       products = products.filter(p => p.isSale);
     }
     
+    // Apply selected category filters
+    if (selectedCategories.length > 0) {
+      products = products.filter(p => selectedCategories.includes(p.category));
+    }
+    
+    // Apply selected status filters
+    if (selectedStatus.includes('new')) {
+      products = products.filter(p => p.isNew);
+    }
+    if (selectedStatus.includes('sale')) {
+      products = products.filter(p => p.isSale);
+    }
+    
     // Apply price range filter
     products = products.filter(p => {
       const price = p.discountPrice || p.price;
@@ -161,9 +199,10 @@ export default function ProductsPage() {
     });
     
     setFilteredProducts(products);
-  }, [category, subcategory, tag, priceRange]);
+  }, [category, subcategory, tag, search, priceRange, selectedCategories, selectedStatus]);
   
   const getPageTitle = () => {
+    if (search) return `Search Results for "${search}"`;
     if (tag === "new") return "New Arrivals";
     if (tag === "sale") return "Sale Items";
     if (category === "men" && subcategory === "shirts") return "Men's Shirts";
@@ -176,6 +215,32 @@ export default function ProductsPage() {
     if (category === "men") return "Men's Collection";
     if (category === "women") return "Women's Collection";
     return "All Products";
+  };
+  
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
+  };
+  
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(prev => {
+      if (prev.includes(status)) {
+        return prev.filter(s => s !== status);
+      } else {
+        return [...prev, status];
+      }
+    });
+  };
+  
+  const resetFilters = () => {
+    setPriceRange([0, 250]);
+    setSelectedCategories([]);
+    setSelectedStatus([]);
   };
   
   return (
@@ -217,15 +282,27 @@ export default function ProductsPage() {
                 <h3 className="font-semibold mb-3">Categories</h3>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="men" />
+                    <Checkbox 
+                      id="men" 
+                      checked={selectedCategories.includes('men')}
+                      onCheckedChange={() => handleCategoryChange('men')}
+                    />
                     <Label htmlFor="men" className="text-sm font-medium leading-none cursor-pointer">Men</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="women" />
+                    <Checkbox 
+                      id="women" 
+                      checked={selectedCategories.includes('women')}
+                      onCheckedChange={() => handleCategoryChange('women')}
+                    />
                     <Label htmlFor="women" className="text-sm font-medium leading-none cursor-pointer">Women</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="accessories" />
+                    <Checkbox 
+                      id="accessories" 
+                      checked={selectedCategories.includes('accessories')}
+                      onCheckedChange={() => handleCategoryChange('accessories')}
+                    />
                     <Label htmlFor="accessories" className="text-sm font-medium leading-none cursor-pointer">Accessories</Label>
                   </div>
                 </div>
@@ -235,15 +312,31 @@ export default function ProductsPage() {
                 <h3 className="font-semibold mb-3">Product Status</h3>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="new" />
+                    <Checkbox 
+                      id="new" 
+                      checked={selectedStatus.includes('new')}
+                      onCheckedChange={() => handleStatusChange('new')}
+                    />
                     <Label htmlFor="new" className="text-sm font-medium leading-none cursor-pointer">New Arrivals</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="sale" />
+                    <Checkbox 
+                      id="sale" 
+                      checked={selectedStatus.includes('sale')}
+                      onCheckedChange={() => handleStatusChange('sale')}
+                    />
                     <Label htmlFor="sale" className="text-sm font-medium leading-none cursor-pointer">Sale</Label>
                   </div>
                 </div>
               </div>
+              
+              <Button 
+                onClick={resetFilters} 
+                variant="outline" 
+                className="w-full mt-6"
+              >
+                Reset Filters
+              </Button>
             </div>
           </div>
           
@@ -275,7 +368,7 @@ export default function ProductsPage() {
               <div className="text-center py-12">
                 <h3 className="text-xl font-semibold mb-2">No products found</h3>
                 <p className="text-gray-500 mb-6">Try adjusting your filters to find what you're looking for.</p>
-                <Button onClick={() => setPriceRange([0, 250])}>Reset Filters</Button>
+                <Button onClick={resetFilters}>Reset Filters</Button>
               </div>
             )}
           </div>
@@ -317,15 +410,27 @@ export default function ProductsPage() {
               <h3 className="font-semibold mb-3">Categories</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="mobile-men" />
+                  <Checkbox 
+                    id="mobile-men" 
+                    checked={selectedCategories.includes('men')}
+                    onCheckedChange={() => handleCategoryChange('men')}
+                  />
                   <Label htmlFor="mobile-men" className="text-sm font-medium leading-none cursor-pointer">Men</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="mobile-women" />
+                  <Checkbox 
+                    id="mobile-women" 
+                    checked={selectedCategories.includes('women')}
+                    onCheckedChange={() => handleCategoryChange('women')}
+                  />
                   <Label htmlFor="mobile-women" className="text-sm font-medium leading-none cursor-pointer">Women</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="mobile-accessories" />
+                  <Checkbox 
+                    id="mobile-accessories" 
+                    checked={selectedCategories.includes('accessories')}
+                    onCheckedChange={() => handleCategoryChange('accessories')}
+                  />
                   <Label htmlFor="mobile-accessories" className="text-sm font-medium leading-none cursor-pointer">Accessories</Label>
                 </div>
               </div>
@@ -335,11 +440,19 @@ export default function ProductsPage() {
               <h3 className="font-semibold mb-3">Product Status</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="mobile-new" />
+                  <Checkbox 
+                    id="mobile-new" 
+                    checked={selectedStatus.includes('new')}
+                    onCheckedChange={() => handleStatusChange('new')}
+                  />
                   <Label htmlFor="mobile-new" className="text-sm font-medium leading-none cursor-pointer">New Arrivals</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="mobile-sale" />
+                  <Checkbox 
+                    id="mobile-sale" 
+                    checked={selectedStatus.includes('sale')}
+                    onCheckedChange={() => handleStatusChange('sale')}
+                  />
                   <Label htmlFor="mobile-sale" className="text-sm font-medium leading-none cursor-pointer">Sale</Label>
                 </div>
               </div>
@@ -347,7 +460,7 @@ export default function ProductsPage() {
           </div>
           
           <div className="mt-6 flex gap-4">
-            <Button variant="outline" className="w-1/2" onClick={() => setPriceRange([0, 250])}>
+            <Button variant="outline" className="w-1/2" onClick={resetFilters}>
               Reset
             </Button>
             <Button className="w-1/2 bg-brand-blue hover:bg-brand-blue-dark" onClick={() => setShowFilters(false)}>
