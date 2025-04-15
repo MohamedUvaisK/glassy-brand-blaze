@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -19,4 +20,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Define fallback environment variables if needed
+  define: {
+    // Ensure process.env is not directly referenced
+    // Instead use import.meta.env
+  }
 }));

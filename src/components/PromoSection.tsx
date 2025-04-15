@@ -8,9 +8,9 @@ const DEFAULT_END_DATE = new Date();
 DEFAULT_END_DATE.setDate(DEFAULT_END_DATE.getDate() + 14);
 
 export default function PromoSection() {
-  // Make the end date configurable through a prop or environment variable
-  const endDate = process.env.PROMO_END_DATE 
-    ? new Date(process.env.PROMO_END_DATE) 
+  // Make the end date configurable through Vite's environment variable format
+  const endDate = import.meta.env.VITE_PROMO_END_DATE 
+    ? new Date(import.meta.env.VITE_PROMO_END_DATE) 
     : DEFAULT_END_DATE;
     
   const [timeLeft, setTimeLeft] = useState({
