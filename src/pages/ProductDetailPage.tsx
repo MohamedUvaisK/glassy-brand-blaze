@@ -42,7 +42,9 @@ const allProducts = [
     category: "men",
     subcategory: "shirts",
     isNew: true,
-    isSale: false
+    isSale: false,
+    image: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?q=80&w=800&auto=format&fit=crop", // Added for ProductCard component
+    hoverImage: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop" // Added for ProductCard component
   },
   {
     id: "2",
@@ -73,7 +75,9 @@ const allProducts = [
     sizes: ["30", "32", "34", "36", "38"],
     colors: ["Blue", "Black", "Gray", "Light Blue"],
     category: "men",
-    subcategory: "pants"
+    subcategory: "pants",
+    image: "https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?q=80&w=800&auto=format&fit=crop", // Added for ProductCard component
+    hoverImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=800&auto=format&fit=crop" // Added for ProductCard component
   },
   {
     id: "3",
@@ -105,7 +109,9 @@ const allProducts = [
     colors: ["Floral Print", "Blue Floral", "Red Floral"],
     category: "women",
     subcategory: "dresses",
-    isNew: true
+    isNew: true,
+    image: "https://images.unsplash.com/photo-1612336307429-8a898d10e223?q=80&w=800&auto=format&fit=crop", // Added for ProductCard component
+    hoverImage: "https://images.unsplash.com/photo-1618244972963-dbad6cf64b21?q=80&w=800&auto=format&fit=crop" // Added for ProductCard component
   }
 ];
 

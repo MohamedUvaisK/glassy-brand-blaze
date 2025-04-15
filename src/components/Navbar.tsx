@@ -34,16 +34,34 @@ export default function Navbar() {
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
+      // Scroll to top when search is submitted
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
+  };
+
+  const handleNavigation = () => {
+    // Close mobile menu if open
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+    
+    // Scroll to top on navigation
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full mt-4 px-4",
         isScrolled
-          ? "glass py-2 shadow-lg"
-          : "bg-transparent py-4"
+          ? "glass-header py-2 shadow-lg rounded-full mx-auto max-w-[95%]"
+          : "bg-transparent py-4 rounded-full mx-auto max-w-[95%]"
       )}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
@@ -54,13 +72,13 @@ export default function Navbar() {
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <Link to="/" className="text-2xl font-bold font-playfair">
+          <Link to="/" className="text-2xl font-bold font-playfair" onClick={handleNavigation}>
             GLASSY
           </Link>
         </div>
 
         <nav className="hidden lg:flex items-center space-x-8">
-          <NavMenu />
+          <NavMenu onNavigation={handleNavigation} />
         </nav>
 
         <div className="flex items-center gap-4">
@@ -81,10 +99,10 @@ export default function Navbar() {
               <Search size={20} />
             </Button>
           </form>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={handleNavigation}>
             <User size={20} />
           </Button>
-          <Link to="/cart">
+          <Link to="/cart" onClick={handleNavigation}>
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingBag size={20} />
               {cartItems.length > 0 && (
@@ -100,7 +118,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          "fixed inset-0 z-50 glass lg:hidden transition-all duration-300",
+          "fixed inset-0 z-50 glass-header lg:hidden transition-all duration-300 rounded-3xl mt-2 mx-2",
           mobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
         )}
       >
@@ -111,12 +129,12 @@ export default function Navbar() {
           >
             <X size={24} />
           </button>
-          <nav className="flex flex-col space-y-6 text-lg">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-            <Link to="/products" onClick={() => setMobileMenuOpen(false)}>Products</Link>
-            <Link to="/products?category=men" onClick={() => setMobileMenuOpen(false)}>Men</Link>
-            <Link to="/products?category=women" onClick={() => setMobileMenuOpen(false)}>Women</Link>
-            <Link to="/products?category=accessories" onClick={() => setMobileMenuOpen(false)}>Accessories</Link>
+          <nav className="flex flex-col space-y-6 text-lg font-medium">
+            <Link to="/" onClick={handleNavigation}>Home</Link>
+            <Link to="/products" onClick={handleNavigation}>Products</Link>
+            <Link to="/products?category=men" onClick={handleNavigation}>Men</Link>
+            <Link to="/products?category=women" onClick={handleNavigation}>Women</Link>
+            <Link to="/products?category=accessories" onClick={handleNavigation}>Accessories</Link>
           </nav>
         </div>
       </div>
