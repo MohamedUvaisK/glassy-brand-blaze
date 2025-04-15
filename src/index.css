@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -91,6 +92,10 @@
     @apply bg-white/10 backdrop-blur-md border border-white/10 shadow-lg rounded-full;
   }
   
+  .glass-header-mobile {
+    @apply bg-white/30 backdrop-blur-md border border-white/20 shadow-lg;
+  }
+  
   .glass-card {
     @apply glass rounded-lg transition-all duration-300 hover:shadow-xl;
   }
@@ -113,4 +118,15 @@
 
 .parallax {
   transition: transform 0.5s cubic-bezier(0.2, 0.49, 0.32, 0.99);
+}
+
+/* Mobile spacing fix */
+@media (max-width: 768px) {
+  main {
+    padding-top: 80px; /* Add space below the header on mobile */
+  }
+  
+  .glass-header-mobile {
+    margin-top: 0;
+  }
 }
